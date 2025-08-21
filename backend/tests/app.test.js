@@ -1,5 +1,6 @@
 import request from 'supertest';
-import app from '../server.js';
+import {app,server} from '../server.js';
+import { disconnectDB } from '../config/db.js';
 
 describe('GET /', () => {
   it('returns 200 OK', async () => {
@@ -7,4 +8,10 @@ describe('GET /', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.message).toBe('OK');
   });
+});
+
+// cleanup after all tests
+afterAll(async () => {
+  await disconnectDB();   // close mongoose
+  if (server) server.close();        // close express server
 });
