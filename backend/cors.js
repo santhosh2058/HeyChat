@@ -1,15 +1,19 @@
-// backend/cors.js (optional helper)
-import cors from 'cors';
+import cors from "cors";
 
-const allowed = [
-  'http://localhost:5173',            // Vite dev
-  'https://hey-chat-nine.vercel.app'
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://hey-chat-nine.vercel.app/login"
 ];
 
-export default cors({
-  origin: (origin, cb) => {
-    if (!origin || allowed.includes(origin)) return cb(null, true);
-    return cb(new Error('Not allowed by CORS'));
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
   },
-  credentials: true
-});
+  credentials: true,
+};
+
+export default cors(corsOptions);
