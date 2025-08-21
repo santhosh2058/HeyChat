@@ -27,7 +27,7 @@ describe("Login component", () => {
   });
 
   it("sets server error when response is not OK", async () => {
-    const _response = { ok: false, message: "Error message" };
+    //const _response = { ok: false, message: "Error message" };
     const _setServerError = vi.fn();
     const { getByText } = render(<Login />);
     const submitButton = getByText("Submit");
@@ -36,7 +36,7 @@ describe("Login component", () => {
   });
 
   it("sets server error when response is null", async () => {
-    const _response = null;
+    //const _response = null;
     const _setServerError = vi.fn();
     const { getByText } = render(<Login />);
     const submitButton = getByText("Submit");
@@ -45,7 +45,7 @@ describe("Login component", () => {
   });
 
   it("does not set server error when response is OK", async () => {
-    const _response = { ok: true };
+    //const _response = { ok: true };
     const _setServerError = vi.fn();
     const { getByText } = render(<Login />);
     const submitButton = getByText("Submit");
@@ -54,7 +54,7 @@ describe("Login component", () => {
   });
 
   it("handles TypeError correctly", async () => {
-    const error = new TypeError("TypeError message");
+    //const error = new TypeError("TypeError message");
     const consoleError = vi.spyOn(console, "error");
     const { getByText } = render(<Login />);
     const submitButton = getByText("Submit");
@@ -66,9 +66,9 @@ describe("Login component", () => {
   it("handles other errors correctly", async () => {
     const error = new Error("Error message");
     const _setServerError = vi.fn();
-    const _onSubmit = vi.fn(() => {
-      throw error;
-    });
+    //const _onSubmit = vi.fn(() => {
+    //  throw error;
+    //});
     const { getByText } = render(<Login />);
     const submitButton = getByText("Submit");
     fireEvent.click(submitButton);
