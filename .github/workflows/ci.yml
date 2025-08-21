@@ -1,18 +1,15 @@
-name: CI (MERN)
+name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   backend:
     name: Backend (Express + Jest)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     services:
       mongo:
         image: mongo:7
@@ -23,9 +20,10 @@ jobs:
           --health-timeout=5s
           --health-retries=5
     env:
-      NODE_ENV: test
-      MONGODB_URI: mongodb://localhost:27017/testdb
-      JWT_SECRET: testsecret
+      MONGO_URI: ${{ secrets.MONGO_URI_TEST }} 
+      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
     steps:
       - uses: actions/checkout@v4
 
@@ -36,15 +34,17 @@ jobs:
           cache-dependency-path: backend/package-lock.json
 
       - run: npm ci
+        working-directory: backend
+
       - run: npm run lint --if-present
+        working-directory: backend
+
       - run: npm test -- --coverage
+        working-directory: backend
 
   frontend:
-    name: Frontend (React + Vite)
+    name: Frontend (React + Vitest + Build)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
 
@@ -55,6 +55,18 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
+        working-directory: frontend
+
       - run: npm run lint --if-present
-      - run: npm run build --if-present
-      - run: npm test --if-present -- --coverage
+        working-directory: frontend
+
+      - run: npm test -- --coverage
+        working-directory: frontend
+
+      - run: npm run build
+        working-directory: frontend
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
