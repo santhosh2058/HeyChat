@@ -3,7 +3,7 @@ import cors from 'cors';
 
 const allowed = [
   'http://localhost:5173',            // Vite dev
-  'https://<your-frontend>.vercel.app'
+  'https://hey-chat-nine.vercel.app'
 ];
 
 export default cors({
