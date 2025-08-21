@@ -1,9 +1,9 @@
 import express from 'express'
-import cors from 'cors';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
 import dotenv from 'dotenv';
+import cors from './cors.js';
 dotenv.config();
 
 const app = express()
