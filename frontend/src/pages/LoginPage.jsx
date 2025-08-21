@@ -1,6 +1,6 @@
 import { Footer } from "@/PageComponents/Footer";
 import { Header } from "@/PageComponents/Header";
-import { Login } from "@/PageComponents/login";
+import { Login } from "@/PageComponents/Login";
 import {
   Flex
 } from "@chakra-ui/react";
