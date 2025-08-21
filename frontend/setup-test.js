@@ -1,3 +1,5 @@
+/* global global */
+
 import "@testing-library/jest-dom/vitest"
 import { JSDOM } from "jsdom"
 import ResizeObserver from "resize-observer-polyfill"
