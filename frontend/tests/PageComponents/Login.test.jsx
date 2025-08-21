@@ -64,11 +64,11 @@ describe("Login component", () => {
   });
 
   it("handles other errors correctly", async () => {
-    const error = new Error("Error message");
+    const _error = new Error("Error message");
     const _setServerError = vi.fn();
-    //const _onSubmit = vi.fn(() => {
-    //  throw error;
-    //});
+    const _onSubmit = vi.fn(() => {
+     throw _error;
+    });
     const { getByText } = render(<Login />);
     const submitButton = getByText("Submit");
     fireEvent.click(submitButton);
