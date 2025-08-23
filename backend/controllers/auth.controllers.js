@@ -5,8 +5,8 @@ import { matchPassword } from "../utils/hashPassword.js";
 // Register User
 export const registerUser = async (req, res) => {
   // Destructure user data from request body
-  const { name, email, username, password, pic } = req.body;
-
+  let { name, email, username, password, pic } = req.body;
+  if (pic === "") pic = undefined;
   try {
     const userExists = await User.findOne({ $or: [{ email }, { username }] });
     if (userExists) {

@@ -24,11 +24,12 @@ export const Register = () => {
     try {
       let uploadedFileUrl = "";
 
-        uploadedFileUrl = await handleUpload();
-        if (!uploadedFileUrl) {
-          alert("File upload failed");
-          return;
-        }
+      if (selectedFile) uploadedFileUrl = await handleUpload();
+
+        // if (!uploadedFileUrl) {
+        //   alert("File upload failed");
+        //   return;
+        // }
       const response = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: {
@@ -61,7 +62,7 @@ export const Register = () => {
         }
       );
       //console.log(res.data);
-      return res.data.url || "";
+      return res.data.url;
     } catch (err) {
       console.error("Upload error:", err);
       alert("Error uploading file");

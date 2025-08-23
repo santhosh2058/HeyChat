@@ -4,6 +4,8 @@ import authRoutes from './routes/auth.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
 import dotenv from 'dotenv';
 import cors from './cors.js';
+import userRoutes from './routes/user.routes.js';
+import chatRoutes from './routes/chat.routes.js';
 dotenv.config();
 
 const app = express()
@@ -16,7 +18,9 @@ app.use(cors)
 app.use(express.json());
 app.use("/api/upload", uploadRoutes);
 app.use('/api/auth',authRoutes)
-//app.use('/api/chat',chatRoutes)
+app.use('/api/user',userRoutes)
+app.use('/api/chat',chatRoutes)
+
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'OK' });
 });
