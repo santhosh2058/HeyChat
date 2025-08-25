@@ -8,10 +8,9 @@ import {
   DataList,
   AbsoluteCenter,
 } from "@chakra-ui/react";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 
 export const Profile = () => {
-  //   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   console.log(user);
 

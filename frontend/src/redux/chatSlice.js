@@ -27,6 +27,7 @@ try {
   savedChats =
     rawChats && rawChats !== "undefined" ? JSON.parse(rawChats) : [];
 } catch (e) {
+  console.error("Error parsing chats from local storage:", e);
   savedChats = [];
 }
 

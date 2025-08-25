@@ -51,6 +51,7 @@ try {
   const rawUser = localStorage.getItem("user");
   savedUser = rawUser && rawUser !== "undefined" ? JSON.parse(rawUser) : null;
 } catch (e) {
+  console.error("Error parsing user from local storage:", e);
   savedUser = null;
 }
 
