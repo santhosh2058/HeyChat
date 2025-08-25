@@ -1,28 +1,26 @@
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import jsconfigPaths from "vite-jsconfig-paths";
-import path from "path";
+import react from "@vitejs/plugin-react";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default defineConfig({
-  plugins: [react(), jsconfigPaths()],
+  plugins: [react()],
   resolve: {
     alias: {
-      // maps "@/..." -> <projectRoot>/src/...
-      "@": path.resolve(__dirname, "src"),
+      "@": resolve(__dirname, "src"),
     },
+  },
+  server: {
+    port: 3000,
   },
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: "./setup-test.js",
     coverage: {
-      reporter: ["text", "html"],
-      all: true,
-      include: ["tests/**/*.{ts,tsx,js,jsx}"],
-    },
-    // make sure Vitest can resolve the same alias
-    alias: {
-      "@": path.resolve(__dirname, "src"),
+      reporter: ["text", "json", "html"],
     },
   },
 });

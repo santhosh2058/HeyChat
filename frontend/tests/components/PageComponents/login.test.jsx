@@ -1,63 +1,53 @@
 import React from "react";
 import { describe, it, beforeEach, expect, vi } from "vitest";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { render } from "../../../test-utils/render";
 
 // --------------------
-// Partial mock of authSlice
+// Mocks
 // --------------------
-vi.mock("@/redux/authSlice", async (importOriginal) => {
-  const actual = await importOriginal();
+vi.mock("@/redux/authSlice", async () => {
+  const actual = await vi.importActual("@/redux/authSlice"); // real reducer
   return {
     ...actual,
-    loginUser: vi.fn(),
+    loginUser: vi.fn(), // mock async action
   };
 });
 
-// --------------------
-// Mock Chakra UI components
-// --------------------
 vi.mock("@chakra-ui/react", () => {
-  const React = require("react");
-  const Simple = (props) => React.createElement("div", props, props.children);
-
+  const Simple = (props) => <div {...props}>{props.children}</div>;
   return {
     AbsoluteCenter: Simple,
     Box: Simple,
     Stack: Simple,
-    Text: (props) => React.createElement("p", props, props.children),
-    Button: ({ children, type = "button", ...rest }) =>
-      React.createElement("button", { type, ...rest }, children),
-    Input: (props) => React.createElement("input", { ...props }),
+    Text: (props) => <p {...props}>{props.children}</p>,
+    Button: ({ children, type = "button", ...rest }) => (
+      <button type={type} {...rest}>{children}</button>
+    ),
+    Input: (props) => <input {...props} />,
     Field: {
-      Root: (props) => React.createElement("div", props, props.children),
-      Label: (props) => React.createElement("label", props, props.children),
-      RequiredIndicator: () => React.createElement("span", null, "*"),
-      ErrorText: (props) =>
-        React.createElement("div", { "data-testid": "field-error" }, props.children),
+      Root: (props) => <div {...props}>{props.children}</div>,
+      Label: (props) => <label {...props}>{props.children}</label>,
+      RequiredIndicator: () => <span>*</span>,
+      ErrorText: (props) => <div data-testid="field-error">{props.children}</div>,
     },
   };
 });
 
-// --------------------
-// Partial mock of react-redux (keep real Provider)
-// --------------------
 vi.mock("react-redux", async (importOriginal) => {
   const actual = await importOriginal();
   return {
-    ...actual,               // keep Provider and other exports
+    ...actual,
     useDispatch: vi.fn(),
     useSelector: vi.fn(),
   };
 });
 
-// --------------------
-// Mock react-router-dom
-// --------------------
-vi.mock("react-router-dom", () => {
-  const React = require("react");
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal();
   return {
-    Link: ({ children, to, ...rest }) =>
-      React.createElement("a", { href: to, ...rest }, children),
+    ...actual,
+    Link: ({ children, to, ...rest }) => <a href={to} {...rest}>{children}</a>,
     useNavigate: vi.fn(),
   };
 });
@@ -66,14 +56,12 @@ vi.mock("react-router-dom", () => {
 // Tests
 // --------------------
 describe("Login component", () => {
-  let loginUserMock;
   let LoginComponent;
-  let renderFn;
-  let reactRedux;
-  let router;
-
+  let loginUserMock;
   let dispatchMock;
   let navigateMock;
+  let reactRedux;
+  let router;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -87,26 +75,20 @@ describe("Login component", () => {
     const loginModule = await import("@/components/PageComponents/Login");
     LoginComponent = loginModule.Login ?? loginModule.default ?? loginModule;
 
-    const renderModule = await import("../../../test-utils/render");
-    renderFn = renderModule.render ?? renderModule.default ?? renderModule;
-
-    // Mock dispatch returning unwrap
     const unwrapMock = vi.fn().mockResolvedValue({ success: true });
     dispatchMock = vi.fn(() => ({ unwrap: unwrapMock }));
     reactRedux.useDispatch.mockReturnValue(dispatchMock);
 
-    // Default selector
     reactRedux.useSelector.mockImplementation((selector) =>
       selector({ auth: { loading: false, error: null } })
     );
 
-    // Mock navigate
     navigateMock = vi.fn();
     router.useNavigate.mockReturnValue(navigateMock);
   });
 
   it("renders form, dispatches loginUser on submit and navigates to /chat", async () => {
-    renderFn(<LoginComponent />);
+    render(<LoginComponent />);
 
     const usernameInput = screen.getByPlaceholderText("me@example.com");
     const passwordInput = screen.getByPlaceholderText("Password");
@@ -121,7 +103,6 @@ describe("Login component", () => {
       username: "testuser",
       password: "password123",
     });
-
     await waitFor(() =>
       expect(router.useNavigate()).toHaveBeenCalledWith("/chat", { replace: true })
     );
@@ -132,8 +113,7 @@ describe("Login component", () => {
       selector({ auth: { loading: false, error: "Invalid credentials" } })
     );
 
-    renderFn(<LoginComponent />);
-
-    expect(screen.getByText("Invalid credentials")).toBeInTheDocument();
+    render(<LoginComponent />);
+    expect(screen.getByText("Invalid credentials")).toBeTruthy();
   });
 });
