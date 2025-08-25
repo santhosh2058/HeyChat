@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, waitFor } from "@testing-library/react";
-import { Login } from "@/PageComponents/Login";
+import { Login } from "@/components/PageComponents/Login";
 import { render } from "../../test-utils/render";
 
 // Mock react-hook-form

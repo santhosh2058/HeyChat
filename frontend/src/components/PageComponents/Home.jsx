@@ -33,7 +33,7 @@ export const Home = () => {
         </Button>
         <Button
           flex="1"
-          colorPalette="teal"
+          colorScheme="teal"
           variant="solid"
           onClick={() => handleButtonClick("signup")}
         >

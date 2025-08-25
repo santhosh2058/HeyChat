@@ -19,20 +19,25 @@ export const registerUser = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
     };
+    const token = generateToken(user._id, user.name, user.username, user.email, user.pic);
     res
       .status(201)
       .cookie(
         "access_token",
-        generateToken(user._id, user.name, user.username, user.email, user.pic),
+        token,
         cookieparams
       )
       .json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        username: user.username,
-        pic: user.pic,
-      });
+          success: "user logged in",
+          token: token,
+          user: {
+            _id: user._id,
+            name: user.name,
+            username: user.username,
+            email: user.email,
+            pic: user.pic,
+          },
+        });
   } catch (error) {
     res.status(500).json({ message: `Server error: ${error}` });
   }
@@ -51,22 +56,24 @@ export const loginUser = async (req, res) => {
         secure: process.env.NODE_ENV === "production",
         sameSite: "Strict",
       };
+      const token = generateToken(
+        user._id,
+        user.name,
+        user.username,
+        user.email,
+        user.pic
+      );
       res
         .cookie(
           "access_token",
-          generateToken(
-            user._id,
-            user.name,
-            user.username,
-            user.email,
-            user.pic
-          ),
+          token,
           cookieparams
         )
         .status(200)
         .json({
           success: "user logged in",
-          userLoggedIn: {
+          token: token,
+          user: {
             _id: user._id,
             name: user.name,
             username: user.username,

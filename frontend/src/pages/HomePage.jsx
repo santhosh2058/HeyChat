@@ -1,7 +1,7 @@
 import { Flex } from "@chakra-ui/react";
-import { Header } from "../PageComponents/Header";
-import { Footer } from "../PageComponents/Footer";
-import { Home } from "@/PageComponents/Home";
+import { Header } from "../components/PageComponents/Header";
+import { Footer } from "../components/PageComponents/Footer";
+import { Home } from "@/components/PageComponents/Home";
 
 export const HomePage = () => {
   return (

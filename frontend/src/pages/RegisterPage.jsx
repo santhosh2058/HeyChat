@@ -1,6 +1,6 @@
-import { Footer } from "@/PageComponents/Footer";
-import { Header } from "@/PageComponents/Header";
-import { Register } from "@/PageComponents/Register";
+import { Footer } from "@/components/PageComponents/Footer";
+import { Header } from "@/components/PageComponents/Header";
+import { Register } from "@/components/PageComponents/Register";
 import { Flex } from "@chakra-ui/react";
 
 export const RegisterPage = () => {

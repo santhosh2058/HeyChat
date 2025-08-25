@@ -1,3 +1,4 @@
+import { registerUser } from "@/redux/authSlice";
 import {
   AbsoluteCenter,
   Box,
@@ -7,10 +8,10 @@ import {
   Input,
   Stack,
 } from "@chakra-ui/react";
-import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { HiUpload } from "react-icons/hi";
+import { useDispatch, useSelector } from "react-redux";
 
 export const Register = () => {
   const {
@@ -19,55 +20,12 @@ export const Register = () => {
     formState: { errors },
   } = useForm();
 
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
   const [selectedFile, setSelectedFile] = useState(null);
-  const onSubmit = async (data) => {
-    try {
-      let uploadedFileUrl = "";
 
-      if (selectedFile) uploadedFileUrl = await handleUpload();
-
-        // if (!uploadedFileUrl) {
-        //   alert("File upload failed");
-        //   return;
-        // }
-      const response = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...data, pic: uploadedFileUrl }),
-      });
-      const result = await response.json();
-      console.log(result); // handle success or error
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      alert("Please select a file first.");
-      return "";
-    }
-
-    const formData = new FormData();
-    formData.append("file", selectedFile); // backend field name must match
-
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/api/upload",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      //console.log(res.data);
-      return res.data.url;
-    } catch (err) {
-      console.error("Upload error:", err);
-      alert("Error uploading file");
-      return "";
-    }
+  const onSubmit = (data) => {
+    dispatch(registerUser({ ...data, file: selectedFile }));
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -201,9 +159,19 @@ export const Register = () => {
             </FileUpload.Root>
 
             {/* Submit */}
-            <Button type="submit" colorScheme="teal" w="full">
-              Submit
+            <Button
+              type="submit"
+              colorScheme="teal"
+              w="full"
+              disabled={loading}
+            >
+              {loading ? "Registering..." : "Submit"}
             </Button>
+            {error && (
+              <Box color="red.500" textAlign="center" fontSize="sm" mt={2}>
+                {error}
+              </Box>
+            )}
           </Stack>
         </Box>
       </Box>

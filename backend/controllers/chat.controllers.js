@@ -60,7 +60,7 @@ export const fetchChat = async (req, res) => {
       select: "name pic email",
     });
 
-    res.status(200).send(populatedResults);
+    res.status(200).json(populatedResults);
   } catch (error) {
     res.status(500).json({ message: `Server error: ${error.message}` });
   }
@@ -175,19 +175,18 @@ export const removeFromGroup = async (req, res) => {
   }
 
   try {
-/*************  ✨ Windsurf Command 🌟  *************/
     const groupChat = await Chat.findById(chatId);
     if (!groupChat) {
       return res.status(404).json({ message: "Group chat not found" });
     }
+    
     // users can be removed only by group admin
     if (groupChat.isGroupAdmin.toString() !== req.user._id.toString()) {
       return res
         .status(403)
         .json({ message: "Only group admin can remove users" });
     }
-/*******  3078f669-da56-41ea-bfb1-a77ec95f1deb  *******/    
-
+ 
     
 
     // Check if the user is not in the group

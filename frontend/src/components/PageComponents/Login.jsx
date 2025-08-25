@@ -1,3 +1,4 @@
+import { loginUser } from "@/redux/authSlice";
 import {
   AbsoluteCenter,
   Box,
@@ -8,8 +9,8 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 
 export const Login = () => {
   const {
@@ -17,39 +18,15 @@ export const Login = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const [serverError, setServerError] = useState("");
+
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth); 
+  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    setServerError(""); // Reset error
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response) {
-        setServerError("Network error. Please try again.");
-        return;
-      }
-      const result = await response.json();
-      if (!response.ok) {
-        if (result && result.message) {
-          setServerError(result.message);
-        } else {
-          setServerError("Login failed");
-        }
-      } else {
-        // handle success (e.g., redirect, save token, etc.)
-        setServerError("");
-      }
-    } catch (error) {
-      if (error instanceof TypeError && error.message.includes("null")) {
-        console.error("Error:", error);
-      } else {
-        setServerError("Network error. Please try again.");
-        console.error("Error:", error);
-      }
-    }
+    const result=await dispatch(loginUser(data)).unwrap()
+    console.log(result);
+    navigate("/chat", { replace: true })
   };
 
   return (
@@ -83,7 +60,7 @@ export const Login = () => {
             css={{ "--field-label-width": "96px" }}
           >
             {/* username */}
-            
+
             <Field.Root required orientation="horizontal">
               <Field.Label>
                 Username
@@ -115,18 +92,24 @@ export const Login = () => {
               </Field.ErrorText>
             </Field.Root>
             {/* submit */}
-            <Button type="submit" colorScheme="teal" variant="solid" w="8vw">
+            <Button
+              type="submit"
+              colorScheme="teal"
+              variant="solid"
+              w="8vw"
+              isLoading={loading}
+            >
               Submit
             </Button>
             {/* server error */}
-            {serverError && (
+            {error && (
               <Text color="red.500" mt={2}>
-                {serverError}
+                {error}
               </Text>
             )}
           </Stack>
           {/* register */}
-          
+
           <Link
             to="/register"
             style={{ color: "#319795", marginTop: "16px", display: "block" }}
