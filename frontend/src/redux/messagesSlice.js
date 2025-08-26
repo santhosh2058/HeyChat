@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const fetchMessages = createAsyncThunk(
   "messages/fetchMessages",
