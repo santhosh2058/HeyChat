@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import cors from './cors.js';
 import userRoutes from './routes/user.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import messageRoutes from './routes/message.routes.js';
 dotenv.config();
 
 const app = express()
@@ -20,6 +21,7 @@ app.use("/api/upload", uploadRoutes);
 app.use('/api/auth',authRoutes)
 app.use('/api/user',userRoutes)
 app.use('/api/chat',chatRoutes)
+app.use('/api/message',messageRoutes)
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'OK' });

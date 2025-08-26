@@ -1,9 +1,22 @@
+import { setSelectedChat } from "@/redux/chatSlice";
 import { formatTime } from "@/utils/formatTime";
 import { Avatar, Box, Flex, Input, InputGroup, Text } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export const ChatItem = ({ chat }) => {
+  const userId = useSelector((state) => state.auth.user._id);
+  const dispatch = useDispatch();
+  const otherUser = !chat.isGroupChat
+    ? chat.users.find((u) => u._id !== userId)
+    : null;
+    console.log(otherUser);
+  //console.log(chat);
+  const onClick = () => {
+    // Handle chat item click
+    dispatch(setSelectedChat(chat));
+    console.log("Chat item clicked:", chat._id);
+  };
   return (
     <Flex
       direction="row"
@@ -14,11 +27,24 @@ export const ChatItem = ({ chat }) => {
       pt={2}
       bgColor="gray.100"
       borderRadius="xl"
+      cursor="pointer"
+      onClick={onClick}
+      _hover={{ bg: "gray.200" }}
     >
       {/* Avatar */}
       <Avatar.Root shape="full" size="lg">
-        <Avatar.Fallback name="UserChat" />
-        <Avatar.Image />
+        <Avatar.Image
+          src={
+            !chat.isGroupChat
+              ? otherUser?.pic
+              : undefined
+          }
+        />
+        <Avatar.Fallback>
+          {chat.isGroupChat
+            ? chat.chatName[0].toUpperCase()
+            : otherUser?.name?.[0]?.toUpperCase()}
+        </Avatar.Fallback>
       </Avatar.Root>
 
       <Flex direction="column" alignItems="center" w="full" p={1} pl={5}>
@@ -28,14 +54,17 @@ export const ChatItem = ({ chat }) => {
           justifyContent="space-between"
           w="full"
         >
-          <Text fontWeight="bold">{chat.chatName}</Text>
+          <Text fontWeight="bold">
+            {otherUser ? otherUser.name : "Unknown"}
+          </Text>
           <Text fontSize="xs" color="gray.500">
             {formatTime(chat.updatedAt)}
           </Text>
         </Flex>
 
         <Text fontSize="sm" w="full">
-          no message
+          {/* Last message preview */}
+          {chat.latestMessage ? chat.latestMessage.content : "No messages yet"}
         </Text>
       </Flex>
     </Flex>
@@ -78,10 +107,11 @@ export const Chats = () => {
       </Box>
 
       {/* Chat List */}
-
-      {chats.map((chat) => (
-        <ChatItem key={chat._id} chat={chat} />
-      ))}
+      <Flex direction="column" alignItems="center" flex="1" w="full" gap={1}>
+        {chats.map((chat) => (
+          <ChatItem key={chat._id} chat={chat} />
+        ))}
+      </Flex>
     </Flex>
   );
 };

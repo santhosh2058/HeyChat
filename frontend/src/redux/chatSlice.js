@@ -20,6 +20,7 @@ export const fetchChats = createAsyncThunk(
   }
 )
 
+
 let savedChats = [];
 
 try {
@@ -35,6 +36,7 @@ const initialState = {
   chats: savedChats,
   loading: false,
   error: null,
+  selectedChat: null
 };
 
 const chatSlice = createSlice({
@@ -47,7 +49,11 @@ const chatSlice = createSlice({
     },
     clearChats: (state) => {
       state.chats = [];
+      state.selectedChat = null;
       localStorage.removeItem("chats");
+    },
+    setSelectedChat: (state, action) => {  
+      state.selectedChat = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -67,5 +73,5 @@ const chatSlice = createSlice({
       })
   },
 })
-export const { clearChats } = chatSlice.actions;
+export const { clearChats,setSelectedChat } = chatSlice.actions;
 export default chatSlice.reducer;

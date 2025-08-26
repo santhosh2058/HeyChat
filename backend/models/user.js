@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  pic: { type: String, default: "https://res.cloudinary.com/dkvvk9d0f/image/upload/v1754958609/default_profile_pic_tloy4b.jpg" }
+  pic: { type: String, default: "https://res.cloudinary.com/santhosh2058/image/upload/v1755093936/Mern-Chat-App/cwmtjb137390zwvelq5j.jpg" }
 },{
   timestamps: true,
 });
