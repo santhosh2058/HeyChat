@@ -1,13 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
 
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 // Async thunk
 export const fetchChats = createAsyncThunk(
   "chat/fetchChats",
   async ( token, { rejectWithValue }) => {
     try {
       if (!token) throw new Error("Token not provided");
-      const res = await axios.get("http://localhost:5000/api/chat", {
+      const res = await axios.get(`${BASE_URL}/api/chat`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

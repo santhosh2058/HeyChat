@@ -1,12 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 export const fetchMessages = createAsyncThunk(
   "messages/fetchMessages",
   async ({ token, chatId }, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/message/${chatId}`,
+        `${BASE_URL}/api/message/${chatId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -25,7 +27,7 @@ export const createMessage = createAsyncThunk(
   async ({ token, chatId, content }, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `http://localhost:5000/api/message`,
+        `${BASE_URL}/api/message`,
         { content, chatId },
         {
           headers: {

@@ -2,6 +2,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 /* ===========================
    Async thunks
 =========================== */
@@ -12,7 +14,7 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `${BASE_URL}/api/auth/register`,
         userData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -31,7 +33,7 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        `${BASE_URL}/api/auth/login`,
         credentials,
         { headers: { "Content-Type": "application/json" } }
       );

@@ -2,7 +2,7 @@ import cors from "cors";
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://hey-chat-nine.vercel.app/login"
+  "https://hey-chat-nine.vercel.app"
 ];
 
 const corsOptions = {
