@@ -1,4 +1,13 @@
-import { Avatar, Container, Flex, IconButton } from "@chakra-ui/react";
+import {
+  Avatar,
+  Box,
+  Container,
+  Flex,
+  HoverCard,
+  IconButton,
+  Portal,
+  Strong,
+} from "@chakra-ui/react";
 import { Tooltip } from "@chakra-ui/react/tooltip";
 import { SiGooglemessages } from "react-icons/si";
 import { MdGroups, MdOutlineLogout } from "react-icons/md";
@@ -12,9 +21,9 @@ export const Sidebar = ({ setActiveSection }) => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const handleLogout = () => {
-    dispatch(clearChats());   // clear chat state
-    dispatch(logout());       // clear redux + localStorage
-    navigate("/login");       // send user back to login page
+    dispatch(clearChats()); // clear chat state
+    dispatch(logout()); // clear redux + localStorage
+    navigate("/login"); // send user back to login page
   };
   return (
     <Flex
@@ -29,41 +38,102 @@ export const Sidebar = ({ setActiveSection }) => {
       borderColor="gray.200"
     >
       {/*top*/}
-      <Flex direction="column" align="center" gap={2} w="full" alignItems="center">
-      {/* Messages Button */}
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          <IconButton onClick={() => setActiveSection("messages")} color="black" bgColor="gray.200" borderRadius="full">
-            <SiGooglemessages />
-          </IconButton>
-        </Tooltip.Trigger>
-        <Tooltip.Content>
-          Messages
-          <Tooltip.Arrow />
-        </Tooltip.Content>
-      </Tooltip.Root>
+      <Flex
+        direction="column"
+        align="center"
+        gap={2}
+        w="full"
+        alignItems="center"
+      >
+        {/* Messages Button */}
+        <Tooltip.Root>
+          <Tooltip.Trigger asChild>
+            <HoverCard.Root openDelay={200} size="sm" positioning={{ placement: "right" }}>
+              <HoverCard.Trigger asChild>
+                <IconButton
+                  onClick={() => setActiveSection("messages")}
+                  color="black"
+                  bgColor="gray.200"
+                  borderRadius="full"
+                >
+                  <SiGooglemessages />
+                </IconButton>
+              </HoverCard.Trigger>
+              <Portal>
+                <HoverCard.Positioner>
+                  <HoverCard.Content maxWidth="240px" bg="gray.900" color="white" p={1} pl={4} pr={4} borderRadius="md">
+                      Chat
+                  </HoverCard.Content>
+                </HoverCard.Positioner>
+              </Portal>
+            </HoverCard.Root>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            Messages
+            <Tooltip.Arrow />
+          </Tooltip.Content>
+        </Tooltip.Root>
 
-      {/* Groups Button */}
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          <IconButton onClick={() => setActiveSection("groups")} color="black" bgColor="gray.200" borderRadius="full">
-            <MdGroups />
-          </IconButton>
-        </Tooltip.Trigger>
-        <Tooltip.Content>
-          Groups
-          <Tooltip.Arrow />
-        </Tooltip.Content>
-      </Tooltip.Root>
-
+        {/* Groups Button */}
+        <Tooltip.Root>
+          <Tooltip.Trigger asChild>
+            <HoverCard.Root openDelay={200} size="sm" positioning={{ placement: "right" }}>
+              <HoverCard.Trigger asChild>
+                <IconButton
+              onClick={() => setActiveSection("groups")}
+              color="black"
+              bgColor="gray.200"
+              borderRadius="full"
+            >
+              <MdGroups />
+            </IconButton>
+              </HoverCard.Trigger>
+              <Portal>
+                <HoverCard.Positioner>
+                  <HoverCard.Content maxWidth="240px" bg="gray.900" color="white" p={1} pl={4} pr={4} borderRadius="md">
+                      Groups
+                  </HoverCard.Content>
+                </HoverCard.Positioner>
+              </Portal>
+            </HoverCard.Root>
+            
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            Groups
+            <Tooltip.Arrow />
+          </Tooltip.Content>
+        </Tooltip.Root>
       </Flex>
-      <Flex direction="column" align="center" gap={2} w="full" alignItems="center">
+      <Flex
+        direction="column"
+        align="center"
+        gap={2}
+        w="full"
+        alignItems="center"
+      >
         {/* settings Button */}
         <Tooltip.Root>
           <Tooltip.Trigger asChild>
-            <IconButton onClick={handleLogout} color="red" bgColor="red.200" borderRadius="full">
+            <HoverCard.Root openDelay={200} size="sm" positioning={{ placement: "right" }}>
+              <HoverCard.Trigger asChild>
+                <IconButton
+              onClick={handleLogout}
+              color="red"
+              bgColor="red.200"
+              borderRadius="full"
+            >
               <MdOutlineLogout />
             </IconButton>
+              </HoverCard.Trigger>
+              <Portal>
+                <HoverCard.Positioner>
+                  <HoverCard.Content maxWidth="240px" bg="gray.900" color="white" p={1} pl={4} pr={4} borderRadius="md">
+                      Logout
+                  </HoverCard.Content>
+                </HoverCard.Positioner>
+              </Portal>
+            </HoverCard.Root>
+            
           </Tooltip.Trigger>
           <Tooltip.Content>
             Logout
@@ -74,12 +144,29 @@ export const Sidebar = ({ setActiveSection }) => {
         {/* profile */}
         <Tooltip.Root>
           <Tooltip.Trigger asChild>
-            <IconButton onClick={() => setActiveSection("profile")} color="black" bgColor="gray.200" borderRadius="full">
+            <HoverCard.Root openDelay={200} size="sm" positioning={{ placement: "right" }}>
+              <HoverCard.Trigger asChild>
+                <IconButton
+              onClick={() => setActiveSection("profile")}
+              color="black"
+              bgColor="gray.200"
+              borderRadius="full"
+            >
               <Avatar.Root shape="full" size="lg">
                 <Avatar.Fallback name={user.name} />
                 <Avatar.Image src={user.pic} />
               </Avatar.Root>
             </IconButton>
+              </HoverCard.Trigger>
+              <Portal>
+                <HoverCard.Positioner>
+                  <HoverCard.Content maxWidth="240px" bg="gray.900" color="white" p={1} pl={4} pr={4} borderRadius="md">
+                      Profile
+                  </HoverCard.Content>
+                </HoverCard.Positioner>
+              </Portal>
+            </HoverCard.Root>
+            
           </Tooltip.Trigger>
           <Tooltip.Content>
             Profile

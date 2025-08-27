@@ -14,6 +14,8 @@ import { IoSend } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { LuArrowDown } from "react-icons/lu";
 import { useStickToBottom } from "use-stick-to-bottom";
+import { socket } from "@/socket";
+import { formatTime } from "@/utils/formatTime";
 
 export const ChatContent = () => {
   const sticky = useStickToBottom();
@@ -23,16 +25,55 @@ export const ChatContent = () => {
   const [inputValue, setInputValue] = useState("");
   const dispatch = useDispatch();
   const messages = useSelector((state) => state.messages.messages) || [];
-  const handleSend = () => {
+
+  // Connect socket when component mounts
+  useEffect(() => {
+    socket.auth = { token, userId };
+    socket.connect();
+
+    // Listen for incoming messages
+    socket.on("receive_message", (msg) => {
+      if (msg.chatId === selectedChat?._id) {
+        // Only update messages for current chat
+        dispatch({ type: "messages/addMessage", payload: msg });
+      }
+    });
+
+    return () => {
+      socket.off("receive_message");
+    };
+  }, [dispatch, token, userId, selectedChat]);
+
+  // Join room whenever selectedChat changes
+  useEffect(() => {
+    if (selectedChat?._id) {
+      socket.emit("join_chat", selectedChat._id);
+    }
+  }, [selectedChat]);
+
+  const handleSend = async () => {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
 
-    // dispatch createMessage thunk
-    dispatch(
-      createMessage({ token, chatId: selectedChat._id, content: trimmed })
-    );
+    // Add message locally for instant feedback
+    dispatch({
+      type: "messages/addMessage",
+      payload: {
+        chat: selectedChat._id,
+        content: trimmed,
+        sender: { _id: userId },
+        _id: Date.now(), // temporary ID until backend responds
+      },
+    });
 
-    setInputValue(""); // clear input after dispatch
+    setInputValue("");
+
+    // Send to backend (saved to DB)
+    await dispatch(
+      createMessage({ token, chatId: selectedChat._id, content: trimmed })
+    ).unwrap();
+
+    // Backend emits this via socket, so real-time updates happen automatically
   };
 
   useEffect(() => {
@@ -125,7 +166,7 @@ export const ChatContent = () => {
       {/* Chat content */}
       <ScrollArea.Root h="full" w="full" flex="1" p={3} bg="#f2f2f2">
         <ScrollArea.Viewport ref={sticky.scrollRef}>
-          <ScrollArea.Content ref={sticky.contentRef} spaceY="4" textStyle="sm">
+          <ScrollArea.Content ref={sticky.contentRef} spaceY="1" textStyle="sm">
             {/** Chat messages will go here */}
             {messages.length === 0 ? (
               <Text color="gray.500">No messages yet...</Text>
@@ -138,18 +179,23 @@ export const ChatContent = () => {
                     justify={isSender ? "flex-end" : "flex-start"}
                     mb={2}
                   >
-                    <Box
+                    <Flex
                       maxW="70%"
                       bg={isSender ? "green.100" : "white"}
                       //color={userId === msg.sender._id ? "white" : "black"}
-                      px={3}
-                      py={2}
+                      p={1}
                       borderRadius="lg"
                       borderBottomRightRadius={isSender ? "0" : "lg"}
                       borderBottomLeftRadius={isSender ? "lg" : "0"}
+                      gap={1}
                     >
-                      <Text>{msg.content}</Text>
-                    </Box>
+                      <Text pl={2} pt={2} pb={2}>{msg.content}</Text>
+                      <Text pl={1} pt={4} fontSize="2xs" color="gray.500">
+                        {formatTime(new Date(msg.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </Text>
+                    </Flex>
                   </Flex>
                 );
               })

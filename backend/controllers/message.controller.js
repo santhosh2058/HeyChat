@@ -1,6 +1,7 @@
 import Chat from "../models/chatModel.js";
 import Message from "../models/messageModel.js";
 import user from "../models/user.js";
+import { io } from "../server.js";
 
 
 export const createMessage = async (req, res) => {
@@ -27,6 +28,9 @@ export const createMessage = async (req, res) => {
     });
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message._id });
+
+    // Emit message to all users in this chat
+    io.to(chatId).emit("receive_message", message);
 
     res.status(201).json(message);
   } catch (error) {

@@ -28,7 +28,13 @@ export const ChatPage = () => {
       {/* Conditional rendering */}
       {activeSection === "messages" && (
         <>
-          <Chats />
+          <Chats isGroup={false}/>
+          <ChatContent />
+        </>
+      )}
+      {activeSection === "groups" && (
+        <>
+          <Chats isGroup={true} />
           <ChatContent />
         </>
       )}

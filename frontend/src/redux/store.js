@@ -6,6 +6,6 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     chat: chatReducer,
-    messages: messagesReducer
+    messages: messagesReducer,
   }
 });
