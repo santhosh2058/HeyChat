@@ -26,45 +26,96 @@ export const ChatContent = () => {
   const dispatch = useDispatch();
   const messages = useSelector((state) => state.messages.messages) || [];
 
+  const [isTyping, setIsTyping] = useState(false);
+  let typingTimeout;
+
+  // When user types
+  const handleTyping = (e) => {
+    setInputValue(e.target.value);
+
+    if (!socket.connected || !selectedChat?._id) return;
+
+    if (!isTyping) {
+      setIsTyping(true);
+      socket.emit("typing", selectedChat._id);
+    }
+
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      setIsTyping(false);
+      socket.emit("stop_typing", selectedChat._id);
+    }, 1000); // stop typing if no input for 1s
+  };
+
+  const [typingUsers, setTypingUsers] = useState([]);
+
+  useEffect(() => {
+    socket.on("typing", ({ userId }) => {
+      setTypingUsers((prev) => [...new Set([...prev, userId])]);
+    });
+
+    socket.on("stop_typing", ({ userId }) => {
+      setTypingUsers((prev) => prev.filter((id) => id !== userId));
+    });
+
+    return () => {
+      socket.off("typing");
+      socket.off("stop_typing");
+    };
+  }, [selectedChat]);
+
+  /** Connect socket once on mount */
+  useEffect(() => {
+    if (!token) return;
+    if (!socket.connected) {
+      socket.auth = { token };
+      socket.connect();
+    }
+  }, [token]);
+  // Fetch messages when chat is selected and Join room
+  useEffect(() => {
+    if (!selectedChat?._id) return;
+    // Fetch messages for selected chat
+    dispatch(fetchMessages({ token, chatId: selectedChat._id })).then(() => {
+      if (sticky.scrollRef.current) {
+        sticky.scrollRef.current.scrollTop =
+          sticky.scrollRef.current.scrollHeight;
+      }
+    });
+
+    // Join chat room once socket is connected
+    const joinRoom = () => {
+      socket.emit("join_chat", selectedChat._id);
+    };
+
+    if (socket.connected) {
+      joinRoom();
+    } else {
+      socket.once("connect", joinRoom);
+    }
+
+    // Cleanup on chat switch / unmount
+    return () => {
+      if (socket.connected) socket.emit("leave_chat", selectedChat._id);
+      socket.off("connect", joinRoom);
+    };
+  }, [selectedChat, dispatch, token]);
+
   // Connect socket when component mounts
   useEffect(() => {
-    socket.auth = { token, userId };
-    socket.connect();
-
     // Listen for incoming messages
     socket.on("receive_message", (msg) => {
-      if (msg.chatId === selectedChat?._id) {
-        // Only update messages for current chat
-        dispatch({ type: "messages/addMessage", payload: msg });
-      }
+      dispatch({ type: "messages/addMessage", payload: msg });
     });
 
     return () => {
       socket.off("receive_message");
     };
-  }, [dispatch, token, userId, selectedChat]);
-
-  // Join room whenever selectedChat changes
-  useEffect(() => {
-    if (selectedChat?._id) {
-      socket.emit("join_chat", selectedChat._id);
-    }
-  }, [selectedChat]);
+  }, [dispatch, token, selectedChat]);
 
   const handleSend = async () => {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
-
-    // Add message locally for instant feedback
-    dispatch({
-      type: "messages/addMessage",
-      payload: {
-        chat: selectedChat._id,
-        content: trimmed,
-        sender: { _id: userId },
-        _id: Date.now(), // temporary ID until backend responds
-      },
-    });
 
     setInputValue("");
 
@@ -75,22 +126,8 @@ export const ChatContent = () => {
 
     // Backend emits this via socket, so real-time updates happen automatically
   };
-
-  useEffect(() => {
-    if (selectedChat) {
-      console.log("Fetching messages for chat:", selectedChat._id);
-      dispatch(fetchMessages({ token, chatId: selectedChat._id }))
-      .then(() => {
-        // Scroll instantly after messages load
-        // Direct DOM jump (0s, no animation)
-        if (sticky.scrollRef.current) {
-          const el = sticky.scrollRef.current;
-          el.scrollTop = el.scrollHeight;
-        }
-      });
-    }
-  }, [selectedChat, dispatch, token]);
-
+  // console.log("Messages in state:", messages);
+  // console.log("Selected Chat in ChatContent:", selectedChat);
   if (selectedChat === null) {
     return (
       <Flex
@@ -121,11 +158,15 @@ export const ChatContent = () => {
       </Flex>
     );
   }
-  console.log("Selected Chat:", selectedChat);
+  //console.log("Selected Chat:", selectedChat);
 
   const otherUser = !selectedChat.isGroupChat
     ? selectedChat.users.find((u) => u._id !== userId)
     : null;
+
+  const messagesForCurrentChat = messages.filter(
+    (msg) => msg.chat._id === selectedChat._id
+  );
 
   return (
     <Flex
@@ -143,7 +184,7 @@ export const ChatContent = () => {
         w="full"
         p={2}
         pl={2}
-        pt={2}
+        pt={1}
         bgColor="blue.50"
       >
         {/* Avatar */}
@@ -158,20 +199,32 @@ export const ChatContent = () => {
           </Avatar.Fallback>
         </Avatar.Root>
 
-        {/* Chat name */}
-        <Text fontWeight="bold" fontSize="lg" color="gray.800" p={1} pl={2}>
-          {selectedChat.isGroupChat ? selectedChat.chatName : otherUser?.name}
-        </Text>
+        <Flex direction="column" p={1} pl={2} h="full">
+          {/* Chat name */}
+          <Text fontWeight="bold" fontSize="lg" color="gray.800">
+            {selectedChat.isGroupChat ? selectedChat.chatName : otherUser?.name}
+          </Text>
+          {/* Typing indicator */}
+          <Box h="20px">
+            {typingUsers.length > 0 && (
+              <Text fontSize="sm" color="gray.500" ml={2}>
+                {!selectedChat.isGroupChat && typingUsers.length === 1
+                  ? `${otherUser?.name} typing...`
+                  : "typing..."}
+              </Text>
+            )}
+          </Box>
+        </Flex>
       </Flex>
       {/* Chat content */}
       <ScrollArea.Root h="full" w="full" flex="1" p={3} bg="#f2f2f2">
         <ScrollArea.Viewport ref={sticky.scrollRef}>
           <ScrollArea.Content ref={sticky.contentRef} spaceY="1" textStyle="sm">
             {/** Chat messages will go here */}
-            {messages.length === 0 ? (
+            {messagesForCurrentChat.length === 0 ? (
               <Text color="gray.500">No messages yet...</Text>
             ) : (
-              messages.map((msg) => {
+              messagesForCurrentChat.map((msg) => {
                 const isSender = msg.sender._id === userId;
                 return (
                   <Flex
@@ -189,7 +242,9 @@ export const ChatContent = () => {
                       borderBottomLeftRadius={isSender ? "lg" : "0"}
                       gap={1}
                     >
-                      <Text pl={2} pt={2} pb={2}>{msg.content}</Text>
+                      <Text pl={2} pt={2} pb={2}>
+                        {msg.content}
+                      </Text>
                       <Text pl={1} pt={4} fontSize="2xs" color="gray.500">
                         {formatTime(new Date(msg.createdAt), {
                           addSuffix: true,
@@ -239,7 +294,7 @@ export const ChatContent = () => {
         >
           <Input
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => handleTyping(e)}
             placeholder="Type a message"
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSend();

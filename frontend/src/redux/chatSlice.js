@@ -22,6 +22,23 @@ export const fetchChats = createAsyncThunk(
   }
 )
 
+export const createGroupChat = createAsyncThunk(
+  "chat/createGroupChat",
+  async ({ users, token, name }, { rejectWithValue }) => {
+    try {
+      if (!token) throw new Error("Token not provided");
+      const res = await axios.post(`${BASE_URL}/api/chat/group`, { name, users }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })  // backend route
+      console.log(res.data);
+      return res.data
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Error creating group chat")
+    }
+  }
+)
 
 let savedChats = [];
 
@@ -73,6 +90,17 @@ const chatSlice = createSlice({
         state.loading = false
         state.error = action.payload
       })
+      .addCase(createGroupChat.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createGroupChat.fulfilled, (state, action) => {
+        state.loading = false;
+        state.chats.unshift(action.payload); // new group added to top
+      })
+      .addCase(createGroupChat.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
   },
 })
 export const { clearChats,setSelectedChat } = chatSlice.actions;

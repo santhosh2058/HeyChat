@@ -5,19 +5,19 @@ import {
   Box,
   Button,
   Flex,
-  HStack,
   IconButton,
   Input,
   InputGroup,
-  Tag,
+  ScrollArea,
   Text,
 } from "@chakra-ui/react";
-import {  useState } from "react";
+import { useEffect, useState } from "react";
 import { BiCommentAdd } from "react-icons/bi";
 import { IoArrowBack } from "react-icons/io5";
 import { LuSearch } from "react-icons/lu";
 import { MdGroupAdd } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
+import { AddGroupComponent } from "./AddGroupComponent";
 
 export const ChatItem = ({ chat }) => {
   const userId = useSelector((state) => state.auth.user._id);
@@ -30,7 +30,7 @@ export const ChatItem = ({ chat }) => {
   const onClick = () => {
     // Handle chat item click
     dispatch(setSelectedChat(chat));
-    console.log("Chat item clicked:", chat._id);
+    //console.log("Chat item clicked:", chat._id);
   };
   return (
     <Flex
@@ -64,7 +64,11 @@ export const ChatItem = ({ chat }) => {
           w="full"
         >
           <Text fontWeight="bold">
-            {otherUser ? otherUser.name : "Unknown"}
+            {chat.isGroupChat
+              ? chat.chatName
+              : otherUser
+                ? otherUser.name
+                : "Unknown"}
           </Text>
           <Text fontSize="xs" color="gray.500">
             {formatTime(chat.updatedAt)}
@@ -82,12 +86,20 @@ export const ChatItem = ({ chat }) => {
 
 export const Chats = ({ isGroup }) => {
   const { chats } = useSelector((state) => state.chat);
+  const token = useSelector((state) => state.auth.token);
+  const userId = useSelector((state) => state.auth.user._id);
   let [newChat, setNewChat] = useState(false);
-  let [newUser, setNewUser] = useState(false);
+  let [addUser, setAddUser] = useState(false);
+  let [addGroup, setAddGroup] = useState(false);
   let [newGroup, setNewGroup] = useState(false);
-  const filteredChats = isGroup
-    ? chats.filter((c) => c.isGroupChat) // only groups
-    : chats; // all chats
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Fetch initial data or perform setup
+  }, []);
 
   const handleAddNewChat = () => {
     // Handle adding a new chat
@@ -95,12 +107,12 @@ export const Chats = ({ isGroup }) => {
   };
   const handleNewUser = () => {
     // Handle adding a new user
-    setNewUser(true);
+    setAddUser(true);
   };
   const handleNewGroup = () => {
     // Handle adding a new group
     setNewChat(false);
-    setNewGroup(true);
+    setAddGroup(true);
   };
 
   //adding new chat
@@ -179,56 +191,46 @@ export const Chats = ({ isGroup }) => {
   }
 
   //adding new user
-  if (newUser) {
+  if (addUser) {
     //logic for adding new user
   }
-  if (newGroup) {
+  if (addGroup) {
     return (
-      <Flex
-        direction="column"
-        alignItems="center"
-        p={1}
-        h="100vh"
-        w="500px"
-        border="1px solid"
-        borderColor="gray.200"
-      >
-        {/**back btn */}
-        {/**add group members txt */}
-        <Flex direction="row" alignItems="center" w="full" p={1} pl={2}>
-          <IconButton
-            onClick={() => {
-              setNewGroup(false);
-              setNewChat(true);
-            }}
-            aria-label="add new chat"
-            bg="white"
-            _hover={{ bg: "gray.200", borderRadius: "full" }}
-          >
-            <IoArrowBack style={{ color: "black" }} />
-          </IconButton>
-          <Box>
-            <Text pl={2}>add Group Members</Text>
-          </Box>
-        </Flex>
-        {/**list of selected users with checkboxes */}
-        {}
-        <HStack>
-          <Tag.Root>
-            <Tag.Label>Closable Tag</Tag.Label>
-            <Tag.EndElement>
-              <Tag.CloseTrigger />
-            </Tag.EndElement>
-          </Tag.Root>
-        </HStack>
-        {/*search bar to search users */}
-
-        {/*list of unselected users on click of user add tag*/}
-
-      </Flex>
+      <AddGroupComponent
+        chats={chats}
+        userId={userId}
+        selectedUsers={selectedUsers}
+        setSelectedUsers={setSelectedUsers}
+        setAvailableUsers={setAvailableUsers}
+        availableUsers={availableUsers}
+        setAddGroup={setAddGroup}
+        setNewGroup={setNewGroup}
+        newGroup={newGroup}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
+        dispatch={dispatch}
+        token={token}
+        onBack={() => {
+          setAddGroup(false);
+          setNewChat(true);
+          setSelectedUsers([]);
+          setAvailableUsers([]);
+          setInputValue("");
+        }}
+        onSuccess={() => {
+          setAddGroup(false);
+          setNewChat(false);
+          setSelectedUsers([]);
+          setAvailableUsers([]);
+          setInputValue("");
+        }}
+      />
     );
   }
 
+  const filteredChats = isGroup
+    ? chats.filter((c) => c.isGroupChat) // only groups
+    : chats; // all chats
   return (
     <Flex
       direction="column"
@@ -271,11 +273,27 @@ export const Chats = ({ isGroup }) => {
       </Box>
 
       {/* Chat List */}
-      <Flex direction="column" alignItems="center" flex="1" w="full" gap={1}>
-        {filteredChats.map((chat) => (
-          <ChatItem key={chat._id} chat={chat} />
-        ))}
-      </Flex>
+      <ScrollArea.Root>
+        <ScrollArea.Viewport style={{ paddingRight: "14px" }}>
+          <ScrollArea.Content>
+            <Flex
+              direction="column"
+              alignItems="center"
+              flex="1"
+              w="full"
+              gap={1}
+            >
+              {filteredChats.map((chat) => (
+                <ChatItem key={chat._id} chat={chat} />
+              ))}
+            </Flex>
+          </ScrollArea.Content>
+        </ScrollArea.Viewport>
+        <ScrollArea.Scrollbar bg="transparent">
+          <ScrollArea.Thumb bg="gray.subtle" />
+        </ScrollArea.Scrollbar>
+        <ScrollArea.Corner />
+      </ScrollArea.Root>
     </Flex>
   );
 };
